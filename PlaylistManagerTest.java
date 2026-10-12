@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
  * Tests for PlaylistManager: normal cases and the bad-input cases from the
  * MusicMate test plan (empty/null input, missing songs, empty playlist).
  *
- * @author MusicMate team (Playlist class)
+ * @author Archer Kim
  * @version 1.1
  */
 public class PlaylistManagerTest {
