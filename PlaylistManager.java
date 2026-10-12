@@ -10,7 +10,7 @@ import java.util.Random;
  * REQUIREMENT: LinkedChain<T> must implement Iterable<T> so this class can
  * walk the chain (needed for viewPlaylist, removeSongByTitle, getSongByGenre).
  *
- * @author MusicMate team (Playlist class)
+ * @author Archer Kim
  * @version 1.1
  */
 public class PlaylistManager {
