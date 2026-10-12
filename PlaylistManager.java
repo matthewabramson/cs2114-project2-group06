@@ -7,9 +7,6 @@ import java.util.Random;
  * It stores songs in a LinkedChain<Song> and enforces all playlist validation.
  * The UI (Main) never touches the LinkedChain directly.
  *
- * REQUIREMENT: LinkedChain<T> must implement Iterable<T> so this class can
- * walk the chain (needed for viewPlaylist, removeSongByTitle, getSongByGenre).
- *
  * @author Archer Kim
  * @version 1.1
  */
@@ -37,10 +34,11 @@ public class PlaylistManager {
     }
 
     /**
-     * Adds a song to the playlist.
+     * Adds a song to the end of the playlist (so songs stay in the order
+     * they were added).
      * Validation: rejects null/empty/blank title or genre; trims long titles.
      * Duplicates are allowed (a user may add the same favorite twice).
-     * Big-O: O(1)
+     * Big-O: O(n) (LinkedChain.addToEnd walks to the last node)
      *
      * @param title  the song title
      * @param artist the artist (null/blank becomes "Unknown Artist")
@@ -59,8 +57,7 @@ public class PlaylistManager {
 
         String cleanArtist = isBlank(artist) ? UNKNOWN_ARTIST : artist.trim();
 
-        playlist.add(new Song(cleanTitle, cleanArtist, genre.trim()));
-        return true;
+        return playlist.addToEnd(new Song(cleanTitle, cleanArtist, genre.trim()));
     }
 
     /**
@@ -72,7 +69,7 @@ public class PlaylistManager {
      */
     public List<Song> viewPlaylist() {
         List<Song> songs = new ArrayList<>();
-        for (Song song : playlist) {
+        for (Song song : snapshot()) {
             songs.add(song);
         }
         return songs;
@@ -93,7 +90,7 @@ public class PlaylistManager {
 
         String target = title.trim();
         Song match = null;
-        for (Song song : playlist) {
+        for (Song song : snapshot()) {
             if (song.getTitle().equalsIgnoreCase(target)) {
                 match = song;
                 break;
@@ -114,7 +111,7 @@ public class PlaylistManager {
     /**
      * Picks a random song from the playlist. If there is more than one song,
      * it re-rolls up to MAX_REROLLS times to avoid repeating the last song.
-     * Big-O: O(n) per roll (LinkedChain.getRandom walks to a random node)
+     * Big-O: O(n) per roll (LinkedChain.get walks to the chosen index)
      *
      * @return a random Song, or null if the playlist is empty
      *         (UI shows "Playlist is empty.")
@@ -124,11 +121,11 @@ public class PlaylistManager {
             return null;
         }
 
-        Song pick = playlist.getRandom();
+        Song pick = randomSong();
         int rerolls = 0;
-        while (playlist.getSize() > 1 && pick != null
-                && pick.equals(lastPlayed) && rerolls < MAX_REROLLS) {
-            pick = playlist.getRandom();
+        while (playlist.size() > 1 && pick.equals(lastPlayed)
+                && rerolls < MAX_REROLLS) {
+            pick = randomSong();
             rerolls++;
         }
 
@@ -153,7 +150,7 @@ public class PlaylistManager {
 
         String target = genre.trim();
         List<Song> matches = new ArrayList<>();
-        for (Song song : playlist) {
+        for (Song song : snapshot()) {
             if (song.getGenre().equalsIgnoreCase(target)) {
                 matches.add(song);
             }
@@ -182,13 +179,33 @@ public class PlaylistManager {
         }
 
         String target = query.trim().toLowerCase();
-        for (Song song : playlist) {
+        for (Song song : snapshot()) {
             if (song.getTitle().toLowerCase().contains(target)
                     || song.getArtist().toLowerCase().contains(target)) {
                 results.add(song);
             }
         }
         return results;
+    }
+
+    /**
+     * Copies the chain into an array, first song first. LinkedChain has no
+     * iterator, so toArray is how we walk it in one O(n) pass.
+     *
+     * @return an array holding every song in playlist order
+     */
+    private Song[] snapshot() {
+        return playlist.toArray(new Song[playlist.size()]);
+    }
+
+    /**
+     * Picks one song at a random position.
+     * Big-O: O(n)
+     *
+     * @return a random song; the playlist must not be empty
+     */
+    private Song randomSong() {
+        return playlist.get(random.nextInt(playlist.size()));
     }
 
     /**
