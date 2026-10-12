@@ -2,7 +2,7 @@
  * Test class for the Song class.
  * Uses student.TestCase for unit testing.
  *
- * @author (your team or names)
+ * @author Matthew Abramson 
  * @version October 2026
  */
 public class SongTest extends student.TestCase {

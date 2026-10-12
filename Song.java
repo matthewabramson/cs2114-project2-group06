@@ -4,7 +4,7 @@ import java.util.Objects;
  * Represents a single song with a title, artist, and genre.
  * Acts as a simple data container with no playlist logic.
  *
- * @author (your team or names)
+ * @author  Matthew Abramson 
  * @version October 2026
  */
 public class Song {
